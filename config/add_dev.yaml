@@ -1,0 +1,15 @@
+database:
+  db_driver: postgresql
+  database: add_desktop_dispatcher
+  user: add_user
+  password: add_pass
+  host: localhost
+  port: 5432
+  minsize: 1
+  maxsize: 5
+  retry_limit: 32
+  retry_interval: 1
+  ssl: True
+  echo: True
+host: localhost
+port: 8000
