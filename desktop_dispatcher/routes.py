@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from views import index
+import views
 
 
 def setup_routes(app):
-    app.router.add_get('/', index)
+    app.router.add_get('/', views.index)
+    app.router.add_get('/send_message', views.send_msg)

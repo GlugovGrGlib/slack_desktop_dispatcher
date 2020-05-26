@@ -12,7 +12,7 @@ BASE_DIR = pathlib.Path(__file__).parent.parent
 DEFAULT_CONFIG_PATH = BASE_DIR / 'config' / 'add_dev.yaml'
 
 
-def get_config(argv=None):
+def get_config(argv=None) -> dict:
     ag = argparse.ArgumentParser()
     commandline.standard_argparse_options(
         ag,

@@ -15,33 +15,33 @@ from settings import get_config
 
 
 async def init_app(argv=None) -> web.Application:
-     app = web.Application(middlewares=['db'])
+     app = web.Application(middlewares=[db])
 
-     config = get_config(argv)
-     app['config'] = config
+     app['config'] = config = get_config(argv)
 
-     db.init_app(app,
-                 dict(
-                    dsn=URL(
-                        drivername=config['database']['db_driver'],
-                        database=config['database']['database'],
-                        username=config['database']['user'],
-                        password=config['database']['password'],
-                        host=config['database']['host'],
-                        port=config['database']['port'],
-                    ),
-                    echo=config['database']['echo'],
-                    min_size=config['database']['minsize'],
-                    max_size=config['database']['maxsize'],
-                    ssl=config['database']['ssl'],
-                    retry_limit=config['database']['retry_limit'],
-                    retry_interval=config['database']['retry_interval'],
-                 ))
-
-     # aiohttp_jinja2.setup(app, loader=jinja2.PackageLoader('desktop_dispatcher', 'templates'))
+     app['config']['gino'] = dict(
+        dsn=URL(
+            drivername=config['database']['db_driver'],
+            database=config['database']['database'],
+            username=config['database']['user'],
+            password=config['database']['password'],
+            host=config['database']['host'],
+            port=config['database']['port'],
+        ),
+        echo=config['database']['echo'],
+        min_size=config['database']['minsize'],
+        max_size=config['database']['maxsize'],
+        ssl=config['database']['ssl'],
+        retry_limit=config['database']['retry_limit'],
+        retry_interval=config['database']['retry_interval'],
+     )
 
      # setup routes, middlewares and db
      setup_routes(app)
+     db.init_app(app)
+
+     # aiohttp_jinja2.setup(app, loader=jinja2.PackageLoader('desktop_dispatcher', 'templates'))
+
 
      return app
 

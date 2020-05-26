@@ -9,7 +9,7 @@ database:
   maxsize: 5
   retry_limit: 32
   retry_interval: 1
-  ssl: True
+  ssl: False
   echo: True
 host: localhost
 port: 8000
