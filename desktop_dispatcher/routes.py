@@ -6,4 +6,5 @@ import views
 
 def setup_routes(app):
     app.router.add_get('/', views.index)
+    app.router.add_post('/', views.interact)
     app.router.add_get('/send_message', views.send_msg)

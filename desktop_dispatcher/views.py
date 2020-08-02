@@ -5,7 +5,7 @@ import logging
 from aiohttp import web
 from slack.errors import SlackApiError
 
-from api import init_client, send_message
+from api import init_client, send_channel_message
 
 
 logger = logging.getLogger(__name__)
@@ -13,10 +13,16 @@ logger = logging.getLogger(__name__)
 async def index(request) -> web.Response:
     return web.Response(text=str("Let's start"))
 
+async def interact(request) -> web.Response:
+    data = await request.text()
+    payload = await request.post()
+    logger.info(f'Request was recieved \n data: {data} \n payload: {payload}')
+    return web.Response(text=str(f"Request was recieved \n data: {data} \n payload: {payload}"))
+
 async def send_msg(request) -> web.Response:
-    client = init_client()
+    client = await init_client()
     try:
-        await send_message(client, channel='#random', text='What do you want from me?')
+        await send_channel_message(client, channel='#random')
     except SlackApiError as resp:
         msg = resp
         logger.error('%s' % (resp))

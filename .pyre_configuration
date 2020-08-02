@@ -1,0 +1,11 @@
+{
+  "binary": "/Users/gliglu/Library/Caches/pypoetry/virtualenvs/add-desktop-dispatcher-21Cz8iKu-py3.8/bin/pyre.bin",
+  "source_directories": [
+    "./desktop_dispatcher"
+  ],
+  "search_path": [
+    "/Users/gliglu/Library/Caches/pypoetry/virtualenvs"
+  ],
+  "taint_models_path": "/Users/gliglu/Library/Caches/pypoetry/virtualenvs/add-desktop-dispatcher-21Cz8iKu-py3.8/lib/pyre_check/taint/",
+  "typeshed": "/Users/gliglu/Library/Caches/pypoetry/virtualenvs/add-desktop-dispatcher-21Cz8iKu-py3.8/lib/pyre_check/typeshed/"
+}
