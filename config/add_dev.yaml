@@ -13,3 +13,5 @@ database:
   echo: True
 host: localhost
 port: 8000
+
+available_desktop: Maksym_Sokolskiy, Olga_Azovtseva
