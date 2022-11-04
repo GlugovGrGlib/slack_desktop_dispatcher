@@ -5,10 +5,12 @@ import logging
 import json
 from aiohttp import web
 from slack.errors import SlackApiError
+from settings import get_config
 
 from api import init_client, send_channel_message, update_msg
 
 logger = logging.getLogger(__name__)
+config = get_config()
 
 
 async def index(request) -> web.Response:
@@ -16,6 +18,10 @@ async def index(request) -> web.Response:
 
 
 async def event_processor(request) -> web.Response:
+    """
+    View to process events. We are need to replay with challenge if it in payload. It needed to inform slack that
+    all events can be processed
+    """
     payload = await request.json()
     if payload.get('event'):
         try:
@@ -29,6 +35,9 @@ async def event_processor(request) -> web.Response:
 
 
 async def interact(request) -> web.Response:
+    """
+    View for handling users choices
+    """
     data = await request.text()
     payload = await request.post()
     payload = json.loads(payload['payload'])
@@ -51,9 +60,12 @@ async def interact(request) -> web.Response:
 
 
 async def send_msg(request) -> web.Response:
+    """
+    This method for sending message to the channel
+    """
     client = await init_client()
     try:
-        await send_channel_message(client, channel='#test')
+        await send_channel_message(client, channel=f"#{config['channel_name']}")
     except SlackApiError as resp:
         msg = resp
         logger.error('%s' % (resp))

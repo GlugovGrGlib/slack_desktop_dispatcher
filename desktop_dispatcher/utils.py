@@ -22,7 +22,8 @@ TRAFARET = T.Dict({
         }),
     T.Key('host'): T.String(),
     T.Key('port'): T.Int(),
-    T.Key('available_desktop'): T.String()
+    T.Key('available_desktop'): T.String(),
+    T.Key('channel_name'): T.String()
 })
 
 async def form_text_block(string: str) -> dict:

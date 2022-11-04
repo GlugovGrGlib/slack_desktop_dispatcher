@@ -16,12 +16,14 @@ import ssl as ssl_lib
 from aiohttp_requests import requests
 from slack import WebClient
 from slack.errors import SlackApiError
+from settings import get_config
 from models.models import get_bind, Desktop
 
 from utils import form_select_desktop_block, form_leave_block
 
 ssl_context = ssl_lib.create_default_context(cafile=certifi.where())
 logger = logging.getLogger()
+config = get_config()
 
 
 async def get_available_desktops():
@@ -155,7 +157,7 @@ async def update_msg(client: WebClient, channel: str, user_id: str = None, text=
                 channel=channel,
                 ts=ts,
             )
-            await send_channel_message(client, '#test', "Someone left the desk")
+            await send_channel_message(client, f"#{config['channel_name']}", "Someone left the desk")
         else:
             await update_occupation(selected_desk, True, user_id)
             client.chat_delete(
