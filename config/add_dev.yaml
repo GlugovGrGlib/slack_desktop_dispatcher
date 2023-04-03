@@ -13,3 +13,6 @@ database:
   echo: True
 host: localhost
 port: 8000
+
+available_desktop: Maksym_Sokolskiy, Olga_Azovtseva
+channel_name: put_your_channel_name_here
