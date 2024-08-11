@@ -1,31 +1,21 @@
 [tool.poetry]
-name = "add_desktop_dispatcher"
+name = "desktop_dispatcher"
 version = "0.1.0"
 description = ""
-authors = ["Glib Glugovskiy <glugov1998@gmail.com>"]
+authors = ["Arsen Hrynevych <arsen.hrynevych@raccoongang.com>", "Glib Glugovskiy <glugov1998@gmail.com>"]
+readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-aiohttp = "^3.6.2"
-aiohttp_jinja2 = "^1.2.0"
-jinja2 = "^2.11.2"
-aiopg = {extras = ["sa"], version = "^1.0.0"}
-gino = "1.0.0"
-trafaret = "^2.0.2"
-sqlalchemy = "^1.3.16"
-gino-aiohttp = "^0.1.0"
-trafaret_config = "^2.0.2"
-slackeventsapi = "^2.1.0"
-rich = "^1.1.9"
-pyre-check = "^0.0.46"
-slackclient = "^2.6.1"
-certifi = "^2020.4.5"
-aiohttp-requests = "^0.1.3"
+python = "^3.12"
+sqlalchemy = "^2.0.31"
+slack-sdk = "^3.31.0"
+python-dotenv = "^1.0.1"
+alembic = "^1.13.2"
+psycopg2-binary = "^2.9.9"
+aiohttp = "^3.9.5"
+slack-bolt = "^1.19.1"
 
-[tool.poetry.dev-dependencies]
-pdbpp = "^0.10.2"
-pytest = "^5.4.2"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

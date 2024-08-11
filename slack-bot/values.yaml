@@ -1,0 +1,35 @@
+replicaCount: 1
+
+image:
+  repository: gliglu16/desktop-dispatcher-bot
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+env:
+  NOTIFICATION_CHANNEL_NAME: general
+  POSTGRES_DB: dispatcher
+  POSTGRES_USER: postgres
+  POSTGRES_HOST: slack-bot-postgresql
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+
+postgresql:
+  auth:
+    postgresqlDatabase: "dispatcher"
+    postgresqlUsername: "postgres"
+    existingSecret: pg-secrets
+    existingSecretKey: postgresPassword
+  primary:
+    service:
+      type: ClusterIP
+  ## Optionally set the persistence configurations as per your requirements
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: "-"
+    accessModes:
+      - ReadWriteOnce

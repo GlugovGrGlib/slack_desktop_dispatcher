@@ -1,73 +1,80 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+import logging
+import os
+from pathlib import Path
 
-import trafaret as T
+from dotenv import load_dotenv
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 
 
-TRAFARET = T.Dict({
-    T.Key('database'):
-        T.Dict({
-            'db_driver': T.String(),
-            'database': T.String(),
-            'user': T.String(),
-            'password': T.String(),
-            'host': T.String(),
-            'port': T.Int(),
-            'minsize': T.Int(),
-            'maxsize': T.Int(),
-            'retry_limit': T.Int(),
-            'retry_interval': T.Int(),
-            'ssl': T.ToBool(),
-            'echo': T.ToBool(),
-        }),
-    T.Key('host'): T.String(),
-    T.Key('port'): T.Int(),
-})
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-async def form_text_block(string: str) -> dict:
-    block = dict(
-        type="section",
-        text=dict(
-            type="mrkdwn",
-            text=string
-        )
-    )
-    return block
+env_path = Path(__file__).resolve().parent.parent / ".env"
 
-async def form_actions_block(buttons: list) -> dict:
-    elements = [dict(
-        type="button",
-        text=dict(
-            type="plain_text",
-            text=button[0],
-            emoji=True
-        ),
-        value=button[1]
-    ) for button in buttons]
+load_dotenv(env_path)
 
-    block = dict(
-        type="actions",
-        elements=elements
-    )
-    return block
+slack_client = WebClient(token=os.getenv("SLACK_BOT_TOKEN"))
+notification_channel_name = os.getenv("NOTIFICATION_CHANNEL_NAME")
 
-async def form_select_desktop_block() -> list:
-    """Generate interacive block to send to common channel."""
-    blocks = list()
-    append = blocks.append
 
-    # Query db if any of desktops is available
-    available_opt = []
-    msg = "Please select desktop" if available_opt else "No desktops are available at the time"
-    append(form_text_block(msg))
-    append(form_actions_block([["Desktop 1 (Max)", "desktop1"], ["Desktop 2 (Olga)", "desktop2"]]))
-    return blocks
+def get_env_variable(variable_name: str) -> str:
+    """
+    Retrieves the value of the specified environment variable.
 
-async def form_leave_block(desktop: str):
-    """Generate interactive block to send to dm."""
-    blocks = list()
-    append = blocks.append
+    Args:
+    - variable_name (str): The name of the environment variable to retrieve.
 
-    append(form_text_block(f"Are  you ready to leave {desktop}?"))
-    append(form_actions_block([["Leave Now!", "leave"]]))
-    return blocks
+    Returns:
+    - str: The value of the specified environment variable.
+
+    Raises:
+    - KeyError: If the specified environment variable is not set.
+    """
+    try:
+        var_value = os.environ[variable_name]
+        logging.info(f"Successfully retrieved the {variable_name} environment variable")
+        return var_value
+    except KeyError:
+        error_msg = f"Set the {variable_name} environment variable"
+        logging.error(error_msg)
+        raise KeyError({"error": error_msg})
+
+
+def get_channel_id_by_name(channel_name):
+    """
+    Retrieves the ID of a Slack channel by its name.
+
+    Args:
+        channel_name (str): The name of the Slack channel to retrieve the ID for.
+
+    Returns:
+        str: The ID of the Slack channel, or None if the channel is not found.
+    """
+    try:
+        response = slack_client.conversations_list()
+        channels = response["channels"]
+        for channel in channels:
+            if channel["name"] == channel_name:
+                return channel["id"]
+        return None
+    except SlackApiError as e:
+        logger.error(f"Error fetching channels: {str(e)}")
+        return None
+
+
+def notify_channel(message):
+    """
+    Sends a message to a specified Slack channel.
+
+    Args:
+        message (str): The message to send to the Slack channel.
+    """
+    channel_id = get_channel_id_by_name(notification_channel_name)
+    if not channel_id:
+        logger.error(f"Channel {notification_channel_name} not found.")
+        return
+    try:
+        slack_client.chat_postMessage(channel=channel_id, text=message)
+    except Exception as e:
+        logger.error(f"Failed to send notification to channel: {str(e)}")

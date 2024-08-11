@@ -1,0 +1,17 @@
+# Ignore environment and Compose files
+# Ignore environment and Compose files
+.env
+compose.yaml
+docker-compose.yaml
+
+# Ignore the local directory of the bot
+slack-bot
+
+# Ignore Dockerfile (if not needed in the build context)
+Dockerfile
+
+# Ignore Makefile
+Makefile
+
+# Ignore Git repository folder
+.git

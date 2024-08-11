@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "slack-bot.fullname" . }}
+  labels:
+    {{- include "slack-bot.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "slack-bot.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "slack-bot.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slack-bot-secret
+                  key: SLACK_BOT_TOKEN
+            - name: SLACK_APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slack-bot-secret
+                  key: SLACK_APP_TOKEN
+            - name: NOTIFICATION_CHANNEL_NAME
+              value: {{ .Values.env.NOTIFICATION_CHANNEL_NAME }}
+            - name: POSTGRES_DB
+              value: {{ .Values.env.POSTGRES_DB }}
+            - name: POSTGRES_USER
+              value: {{ .Values.env.POSTGRES_USER }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pg-secrets
+                  key: postgresql-password
+            - name: POSTGRES_HOST
+              value: {{ .Values.env.POSTGRES_HOST }}

@@ -1,7 +1,14 @@
-up: run_db run_app
+up:
+	source .env; docker compose up -d
 
-run_app:
-	source secret.env; poetry run python desktop_dispatcher/main.py add_dev.yaml
+rebuild:
+	source .env; docker compose up -d --build
 
-run_db:
-	docker run -d -e POSTGRES_DB=add_desktop_dispatcher -e POSTGRES_USER=add_user -e POSTGRES_PASSWORD=add_pass -p 5432:5432 postgres:10
+down:
+	docker compose down -v
+
+revision:
+	source .env; alembic revision --autogenerate
+
+migrate:
+	source .env; alembic upgrade head

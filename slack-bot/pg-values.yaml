@@ -1,0 +1,16 @@
+postgresql:
+  auth:
+    postgresqlDatabase: "dispatcher"
+    postgresqlUsername: "postgres"
+    existingSecret: pg-secrets
+    existingSecretKey: postgresPassword
+  primary:
+    service:
+      type: ClusterIP
+  ## Optionally set the persistence configurations as per your requirements
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: "-"
+    accessModes:
+      - ReadWriteOnce
