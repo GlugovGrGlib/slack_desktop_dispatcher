@@ -52,7 +52,7 @@ def get_channel_id_by_name(channel_name):
         str: The ID of the Slack channel, or None if the channel is not found.
     """
     try:
-        response = slack_client.conversations_list()
+        response = slack_client.users_conversations()
         channels = response["channels"]
         for channel in channels:
             if channel["name"] == channel_name:
