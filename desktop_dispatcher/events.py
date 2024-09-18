@@ -12,7 +12,7 @@ from slack_sdk.models.blocks import (
     StaticSelectElement,
 )
 
-from .models import Desktop
+from .models import Desktop, TempDesktopSelection
 from .session import SessionLocal
 from .utils import get_env_variable, notify_channel
 
@@ -206,49 +206,46 @@ def handle_new_desktop_selection(ack, body, say):
     selected_desktop_id = body["actions"][0]["selected_option"]["value"]
     user_id = body["user"]["id"]
     
-    # Store the selected desktop ID in a temporary storage
-    # For this example, we'll use a global dictionary. In a production environment,
-    # you might want to use a more robust solution like Redis or a database.
-    if not hasattr(app, 'temp_desktop_selections'):
-        app.temp_desktop_selections = {}
-    app.temp_desktop_selections[user_id] = selected_desktop_id
+    try:
+        temp_selection = session.query(TempDesktopSelection).filter_by(user_id=user_id).first()
+        
+        if temp_selection:
+            # Update existing selection
+            temp_selection.desktop_id = selected_desktop_id
+        else:
+            # Create new selection
+            temp_selection = TempDesktopSelection(user_id=user_id, desktop_id=selected_desktop_id)
+            session.add(temp_selection)
+    
+        session.commit()
+    except Exception as e:
+        logger.error(f"Error storing temporary desktop selection: {str(e)}")
+        say("⛔ An error occurred. Please try again or contact the maintainer.")
 
 
 @app.action("confirm_desktop_change")
 def handle_confirm_desktop_change(ack, body, say):
-    """
-    Handles the confirmation of changing to a new desktop.
-
-    This function retrieves the new desktop ID from temporary storage,
-    updates the database to reflect the change, and notifies the user and channel.
-
-    Args:
-        ack (function): The function to acknowledge receipt of the action from Slack.
-        body (dict): The payload of the incoming action request from Slack.
-        say (function): The function to send a message back to Slack.
-    """
     ack()
     user_id = body["user"]["id"]
     
     try:
-        # Get the new desktop ID from temporary storage
-        new_desktop_id = app.temp_desktop_selections.get(user_id)
-        if not new_desktop_id:
-            say("⛔  No desktop selected. Please try again.")
+        temp_selection = session.query(TempDesktopSelection).filter_by(user_id=user_id).first()
+        if not temp_selection:
+            say("⛔ No desktop selected. Please try again.")
             return
 
-        # Get the current desktop for the user
+        new_desktop_id = temp_selection.desktop_id
+
         current_desktop = (
             session.query(Desktop)
             .filter(Desktop.occupied == True, Desktop.user_id == user_id)
             .first()
         )
 
-        # Get the new desktop
         new_desktop = session.query(Desktop).filter(Desktop.id == new_desktop_id).first()
 
         if not new_desktop or new_desktop.occupied:
-            say("⛔  The selected desktop is no longer available. Please try again.")
+            say("⛔ The selected desktop is no longer available. Please try again.")
             return
 
         # Mark the current desktop as unoccupied
@@ -260,40 +257,36 @@ def handle_confirm_desktop_change(ack, body, say):
         new_desktop.occupied = True
         new_desktop.user_id = user_id
 
+        # Clear the temporary selection from the database
+        session.delete(temp_selection)
+        
         session.commit()
 
-        # Clear the temporary storage
-        del app.temp_desktop_selections[user_id]
-
-        say(f"🟢  You changed {current_desktop.name} -> *{new_desktop.name}*")
-        notify_channel(f"🖥️  *<@{user_id}>* changed desktop from *{current_desktop.name}* -> *{new_desktop.name}*")
+        say(f"🟢 You changed {current_desktop.name} -> *{new_desktop.name}*")
+        notify_channel(f"🖥️ *<@{user_id}>* changed desktop from *{current_desktop.name}* -> *{new_desktop.name}*")
 
     except Exception as e:
         logger.error(f"An error occurred while changing desktop: {str(e)}")
-        say("⛔  An error occurred. Please contact maintainer.")
+        say("⛔ An error occurred. Please contact maintainer.")
+        # Rollback the session in case of error
+        session.rollback()
 
 
 @app.action("cancel_desktop_change")
 def handle_cancel_desktop_change(ack, body, say):
-    """
-    Handles the cancellation of changing to a new desktop.
-
-    This function clears any temporary storage related to the desktop change
-    and informs the user that the change was cancelled.
-
-    Args:
-        ack (function): The function to acknowledge receipt of the action from Slack.
-        body (dict): The payload of the incoming action request from Slack.
-        say (function): The function to send a message back to Slack.
-    """
     ack()
     user_id = body["user"]["id"]
     
-    # Clear the temporary storage if it exists
-    if hasattr(app, 'temp_desktop_selections') and user_id in app.temp_desktop_selections:
-        del app.temp_desktop_selections[user_id]
+    try:
+        temp_selection = session.query(TempDesktopSelection).filter_by(user_id=user_id).first()
+        if temp_selection:
+            session.delete(temp_selection)
+            session.commit()
 
-    say("⛔  Desktop change cancelled.")
+        say("⛔ Desktop change cancelled.")
+    except Exception as e:
+        logger.error(f"Error cancelling desktop change: {str(e)}")
+        say("⛔ An error occurred while cancelling. Please try again or contact the maintainer.")
 
 
 @app.action("change_desktop")
