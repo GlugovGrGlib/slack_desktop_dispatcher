@@ -1,8 +1,15 @@
-from slack_bolt.adapter.socket_mode import SocketModeHandler
+import asyncio
 
-from .events import app
-from .utils import get_env_variable
+from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 
+from .config import get_env_variable
+from .events import *
+from .slack_client import app
+
+
+async def main():
+    handler = AsyncSocketModeHandler(app, get_env_variable('SLACK_APP_TOKEN'))
+    await handler.start_async()
 
 if __name__ == "__main__":
-    SocketModeHandler(app, get_env_variable('SLACK_APP_TOKEN')).start()
+    asyncio.run(main())

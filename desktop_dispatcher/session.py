@@ -1,9 +1,9 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine.url import URL
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from desktop_dispatcher.utils import get_env_variable
+from .config import get_env_variable
+
 
 db_user = get_env_variable("POSTGRES_USER")
 db_password = get_env_variable("POSTGRES_PASSWORD")
@@ -11,7 +11,7 @@ db_host = get_env_variable("POSTGRES_HOST")
 db_name = get_env_variable("POSTGRES_DB")
 
 db_url = URL.create(
-        drivername="postgresql",
+        drivername="postgresql+asyncpg",
         database=db_name,
         username=db_user,
         password=db_password,
@@ -19,8 +19,8 @@ db_url = URL.create(
         port=5432
 )
 
-engine = create_engine(db_url)
+engine = create_async_engine(db_url)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+async_session = async_sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
