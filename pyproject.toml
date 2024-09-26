@@ -11,11 +11,13 @@ sqlalchemy = "^2.0.31"
 slack-sdk = "^3.31.0"
 python-dotenv = "^1.0.1"
 alembic = "^1.13.2"
-psycopg2-binary = "^2.9.9"
 aiohttp = "^3.9.5"
 slack-bolt = "^1.19.1"
+asyncpg = "^0.29.0"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
